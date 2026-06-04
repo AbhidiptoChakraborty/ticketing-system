@@ -3,21 +3,40 @@ from app.tasks.notifications import send_notification
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.dependencies import get_current_user, require_role
+from app.auth.security import hash_password
 from app.db.dependencies import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
 # CREATE USER
-@router.post("/users")
+@router.post("/users", response_model=UserRead)
 async def create_user(
     user: UserCreate,
     background_tasks: BackgroundTasks,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
 ):
+    result = await db.execute(
+        select(User).where(User.username == user.username)
+    )
 
-    new_user = User(name=user.name)
+    existing_user = result.scalar_one_or_none()
+
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Username already registered"
+        )
+
+    new_user = User(
+        name=user.name,
+        username=user.username,
+        password_hash=hash_password(user.password),
+        role=user.role
+    )
 
     db.add(new_user)
 
@@ -30,16 +49,14 @@ async def create_user(
         f"New user created: {new_user.name}"
     )
 
-    return {
-        "id": new_user.id,
-        "name": new_user.name
-    }
+    return new_user
 
 
 # GET ALL USERS
-@router.get("/users")
+@router.get("/users", response_model=list[UserRead])
 async def get_users(
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
 ):
 
     result = await db.execute(select(User))
@@ -50,12 +67,18 @@ async def get_users(
 
 
 # UPDATE USER
-@router.put("/users/{user_id}")
+@router.put("/users/{user_id}", response_model=UserRead)
 async def update_user(
     user_id: int,
-    updated_user: UserCreate,
-    db: AsyncSession = Depends(get_db)
+    updated_user: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    if current_user.id != user_id and current_user.role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Not enough permissions"
+        )
 
     result = await db.execute(
         select(User).where(User.id == user_id)
@@ -82,7 +105,8 @@ async def update_user(
 @router.delete("/users/{user_id}")
 async def delete_user(
     user_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_role("admin"))
 ):
 
     result = await db.execute(
