@@ -11,6 +11,7 @@ from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
+
 # CREATE USER
 @router.post("/users", response_model=UserRead)
 async def create_user(

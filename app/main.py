@@ -1,16 +1,15 @@
-from fastapi import FastAPI
-from fastapi import Depends
-
 from dotenv import load_dotenv
-load_dotenv()
+from fastapi import Depends, FastAPI
 
 from app.auth.dependencies import get_current_user
 from app.db.database import engine
 from app.models.base import Base
-from app.models import user
+from app.models import user  # noqa: F401
 from app.routers import auth
 from app.routers import users
 from app.schemas.user import UserRead
+
+load_dotenv()
 
 app = FastAPI()
 

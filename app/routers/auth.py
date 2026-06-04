@@ -4,7 +4,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.jwt_handler import create_access_token
-from app.auth.security import hash_password, verify_password
+from app.auth.security import (
+    hash_password,
+    verify_password,
+)
 from app.db.dependencies import get_db
 from app.models.user import User
 from app.schemas.user import Token, UserRead, UserRegister
@@ -12,7 +15,11 @@ from app.schemas.user import Token, UserRead, UserRegister
 router = APIRouter(tags=["auth"])
 
 
-@router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserRead,
+    status_code=status.HTTP_201_CREATED
+)
 async def register_user(
     user: UserRegister,
     db: AsyncSession = Depends(get_db)
