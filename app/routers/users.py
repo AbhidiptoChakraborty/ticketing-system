@@ -7,6 +7,8 @@ from app.auth.dependencies import get_current_user, require_role
 from app.auth.security import hash_password
 from app.db.dependencies import get_db
 from app.models.user import User
+from app.models.ticket import Ticket
+from app.schemas.ticket import TicketRead
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
@@ -127,3 +129,22 @@ async def delete_user(
     await db.commit()
 
     return {"message": "User deleted"}
+
+
+# GET TICKETS FOR A USER
+@router.get("/users/{user_id}/tickets", response_model=list[TicketRead])
+async def get_user_tickets(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.id != user_id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    result = await db.execute(
+        select(Ticket).where(Ticket.owner_id == user_id)
+    )
+
+    tickets = result.scalars().all()
+
+    return tickets

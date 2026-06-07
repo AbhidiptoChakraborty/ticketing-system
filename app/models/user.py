@@ -1,5 +1,5 @@
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
 
@@ -34,3 +34,6 @@ class User(Base):
         String,
         default="user"
     )
+
+    # relationship to tickets
+    tickets = relationship("Ticket", back_populates="owner", cascade="all, delete-orphan")
