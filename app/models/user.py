@@ -36,4 +36,8 @@ class User(Base):
     )
 
     # relationship to tickets
-    tickets = relationship("Ticket", back_populates="owner", cascade="all, delete-orphan")
+    tickets = relationship(
+        "Ticket",
+        back_populates="owner",
+        cascade="all, delete-orphan",
+    )

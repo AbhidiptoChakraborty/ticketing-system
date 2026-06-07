@@ -11,12 +11,16 @@ from app.tasks.notifications import send_notification
 router = APIRouter()
 
 
-@router.post("/tickets", response_model=TicketRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/tickets",
+    response_model=TicketRead,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_ticket(
     ticket: TicketCreate,
     background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
     new_ticket = Ticket(
         title=ticket.title,
@@ -40,19 +44,25 @@ async def create_ticket(
 @router.get("/tickets", response_model=list[TicketRead])
 async def list_tickets(
     db: AsyncSession = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user=Depends(get_current_user),
 ):
     if current_user.role == "admin":
         result = await db.execute(select(Ticket))
     else:
-        result = await db.execute(select(Ticket).where(Ticket.owner_id == current_user.id))
+        result = await db.execute(
+            select(Ticket).where(Ticket.owner_id == current_user.id)
+        )
 
     tickets = result.scalars().all()
     return tickets
 
 
 @router.get("/tickets/{ticket_id}", response_model=TicketRead)
-async def get_ticket(ticket_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(get_current_user)):
+async def get_ticket(
+    ticket_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
 
@@ -66,7 +76,12 @@ async def get_ticket(ticket_id: int, db: AsyncSession = Depends(get_db), current
 
 
 @router.put("/tickets/{ticket_id}", response_model=TicketRead)
-async def update_ticket(ticket_id: int, updated: TicketUpdate, db: AsyncSession = Depends(get_db), current_user = Depends(require_role("admin"))):
+async def update_ticket(
+    ticket_id: int,
+    updated: TicketUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin")),
+):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
 
@@ -89,7 +104,11 @@ async def update_ticket(ticket_id: int, updated: TicketUpdate, db: AsyncSession 
 
 
 @router.delete("/tickets/{ticket_id}")
-async def delete_ticket(ticket_id: int, db: AsyncSession = Depends(get_db), current_user = Depends(require_role("admin"))):
+async def delete_ticket(
+    ticket_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user=Depends(require_role("admin")),
+):
     result = await db.execute(select(Ticket).where(Ticket.id == ticket_id))
     ticket = result.scalar_one_or_none()
 

@@ -19,17 +19,52 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         'tickets',
-        sa.Column('id', sa.Integer(), primary_key=True, nullable=False),
+        sa.Column(
+            'id',
+            sa.Integer(),
+            primary_key=True,
+            nullable=False,
+        ),
         sa.Column('title', sa.String(), nullable=False),
         sa.Column('description', sa.Text(), nullable=False),
-        sa.Column('status', sa.String(), nullable=False, server_default='OPEN'),
+        sa.Column(
+            'status',
+            sa.String(),
+            nullable=False,
+            server_default='OPEN',
+        ),
         sa.Column('response', sa.Text(), nullable=True),
-        sa.Column('owner_id', sa.Integer(), sa.ForeignKey('users.id'), nullable=False),
-        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
-        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            'owner_id',
+            sa.Integer(),
+            sa.ForeignKey('users.id'),
+            nullable=False,
+        ),
+        sa.Column(
+            'created_at',
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
+        sa.Column(
+            'updated_at',
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
     )
-    op.create_index(op.f('ix_tickets_id'), 'tickets', ['id'], unique=False)
-    op.create_index(op.f('ix_tickets_owner_id'), 'tickets', ['owner_id'], unique=False)
+    op.create_index(
+        op.f('ix_tickets_id'),
+        'tickets',
+        ['id'],
+        unique=False,
+    )
+    op.create_index(
+        op.f('ix_tickets_owner_id'),
+        'tickets',
+        ['owner_id'],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
