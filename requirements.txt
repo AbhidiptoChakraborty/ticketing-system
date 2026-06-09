@@ -40,3 +40,6 @@ typing_extensions==4.15.0
 uvicorn==0.47.0
 flake8
 psycopg2-binary==2.9.12
+celery
+redis
+prometheus-client

@@ -14,6 +14,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/data
 
   api:
     build: .
@@ -26,3 +28,6 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/ticketing_db
       SECRET_KEY: change-me
+
+volumes:
+  db_data:
