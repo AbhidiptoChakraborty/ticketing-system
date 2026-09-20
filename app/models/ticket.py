@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Integer, String, DateTime, Text, func, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -45,13 +47,34 @@ class Ticket(Base):
         nullable=True
     )
 
-    created_at: Mapped[str] = mapped_column(
+    priority: Mapped[str] = mapped_column(
+        String,
+        default="MEDIUM",
+        nullable=False,
+        index=True,
+    )
+
+    category: Mapped[str] = mapped_column(
+        String,
+        default="GENERAL",
+        nullable=False,
+        index=True,
+    )
+
+    comments = relationship(
+        "TicketComment",
+        back_populates="ticket",
+        cascade="all, delete-orphan",
+        order_by="TicketComment.created_at",
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
     )
 
-    updated_at: Mapped[str] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
