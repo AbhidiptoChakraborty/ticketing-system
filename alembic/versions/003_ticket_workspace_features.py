@@ -16,24 +16,59 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column(
-        "tickets", sa.Column("priority", sa.String(), nullable=False, server_default="MEDIUM")
+        "tickets",
+        sa.Column(
+            "priority",
+            sa.String(),
+            nullable=False,
+            server_default="MEDIUM",
+        ),
     )
     op.add_column(
-        "tickets", sa.Column("category", sa.String(), nullable=False, server_default="GENERAL")
+        "tickets",
+        sa.Column(
+            "category",
+            sa.String(),
+            nullable=False,
+            server_default="GENERAL",
+        ),
     )
     op.create_index("ix_tickets_priority", "tickets", ["priority"])
     op.create_index("ix_tickets_category", "tickets", ["category"])
     op.create_table(
         "ticket_comments",
         sa.Column("id", sa.Integer(), primary_key=True, nullable=False),
-        sa.Column("ticket_id", sa.Integer(), sa.ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("author_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column(
+            "ticket_id",
+            sa.Integer(),
+            sa.ForeignKey("tickets.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "author_id",
+            sa.Integer(),
+            sa.ForeignKey("users.id"),
+            nullable=False,
+        ),
         sa.Column("body", sa.Text(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.func.now(),
+            nullable=False,
+        ),
     )
     op.create_index("ix_ticket_comments_id", "ticket_comments", ["id"])
-    op.create_index("ix_ticket_comments_ticket_id", "ticket_comments", ["ticket_id"])
-    op.create_index("ix_ticket_comments_author_id", "ticket_comments", ["author_id"])
+    op.create_index(
+        "ix_ticket_comments_ticket_id",
+        "ticket_comments",
+        ["ticket_id"],
+    )
+    op.create_index(
+        "ix_ticket_comments_author_id",
+        "ticket_comments",
+        ["author_id"],
+    )
 
 
 def downgrade() -> None:

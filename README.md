@@ -9,6 +9,7 @@ TicketFlow is a FastAPI support-ticket API with role-aware queues, collaborative
 - Ticket priority (`LOW` through `URGENT`), category, lifecycle status, and agent response
 - Search, filtering, sorting, and pagination for busy ticket queues
 - Comment threads so customers and support staff can collaborate in context
+- Immutable activity timelines for ticket creation, triage, and comment events
 - Permission-aware dashboard counts for open work and urgent/high-priority issues
 - Prometheus-compatible metrics at `/metrics`
 
@@ -84,6 +85,7 @@ curl -X POST http://localhost:8000/tickets \
 | `GET /tickets/dashboard` | Open-work and priority snapshot scoped to the signed-in user |
 | `PATCH /tickets/{id}` | Admin triage updates: status, priority, category, and response |
 | `GET/POST /tickets/{id}/comments` | View and add conversation messages |
+| `GET /tickets/{id}/activity` | View the chronological audit trail |
 
 Use `POST /login` with form fields (`username`, `password`) to obtain a bearer token, then authorize it in the API docs.
 
@@ -150,6 +152,7 @@ FastAPI routes → authentication dependencies → SQLAlchemy async session → 
 - `app/schemas/` defines validated request and response payloads.
 - `alembic/versions/` tracks database migrations.
 - `app/metrics.py` exposes Prometheus metrics at `/metrics`.
+- `app/services/` contains reusable application workflows, including audit logging.
 
 ## Development
 

@@ -1,11 +1,16 @@
-import time
 import logging
+import time
 from typing import Callable
 
 logger = logging.getLogger(__name__)
 
 try:
-    from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+    from prometheus_client import (
+        CONTENT_TYPE_LATEST,
+        Counter,
+        Histogram,
+        generate_latest,
+    )
     HAS_PROM = True
 except Exception:  # pragma: no cover - optional dependency
     HAS_PROM = False
@@ -24,24 +29,28 @@ if HAS_PROM:
         ["method", "path"],
     )
 
-
     async def metrics_middleware(request, call_next: Callable):
         start = time.time()
         response = await call_next(request)
         resp_time = time.time() - start
         try:
-            REQUEST_LATENCY.labels(request.method, request.url.path).observe(resp_time)
-            REQUEST_COUNT.labels(request.method, request.url.path, str(response.status_code)).inc()
+            REQUEST_LATENCY.labels(
+                request.method,
+                request.url.path,
+            ).observe(resp_time)
+            REQUEST_COUNT.labels(
+                request.method,
+                request.url.path,
+                str(response.status_code),
+            ).inc()
         except Exception:
             logger.exception("Failed to record metrics")
         return response
-
 
     # simple metrics router
     from fastapi import APIRouter, Response
 
     router = APIRouter()
-
 
     @router.get("/metrics")
     async def metrics():
@@ -55,7 +64,6 @@ else:  # no-op middleware and router when prometheus_client isn't installed
     from fastapi import APIRouter, Response
 
     router = APIRouter()
-
 
     @router.get("/metrics")
     async def metrics():

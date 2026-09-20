@@ -3,12 +3,22 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-TicketStatus = Literal["OPEN", "IN_PROGRESS", "WAITING_ON_CUSTOMER", "RESOLVED", "CLOSED"]
+TicketStatus = Literal[
+    "OPEN",
+    "IN_PROGRESS",
+    "WAITING_ON_CUSTOMER",
+    "RESOLVED",
+    "CLOSED",
+]
 TicketPriority = Literal["LOW", "MEDIUM", "HIGH", "URGENT"]
 
 
 class TicketBase(BaseModel):
-    title: str = Field(min_length=3, max_length=160, examples=["Unable to access billing portal"])
+    title: str = Field(
+        min_length=3,
+        max_length=160,
+        examples=["Unable to access billing portal"],
+    )
     description: str = Field(min_length=5, max_length=5000)
 
 
@@ -19,7 +29,11 @@ class TicketCreate(TicketBase):
 
 class TicketUpdate(BaseModel):
     title: Optional[str] = Field(default=None, min_length=3, max_length=160)
-    description: Optional[str] = Field(default=None, min_length=5, max_length=5000)
+    description: Optional[str] = Field(
+        default=None,
+        min_length=5,
+        max_length=5000,
+    )
     status: Optional[TicketStatus] = None
     response: Optional[str] = Field(default=None, max_length=5000)
     priority: Optional[TicketPriority] = None
@@ -50,6 +64,17 @@ class TicketCommentRead(BaseModel):
     ticket_id: int
     author_id: int
     body: str
+    created_at: datetime
+
+
+class TicketActivityRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    ticket_id: int
+    actor_id: int
+    event_type: str
+    details: dict
     created_at: datetime
 
 

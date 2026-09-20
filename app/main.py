@@ -4,7 +4,7 @@ from subprocess import run
 import sys
 
 from app.auth.dependencies import get_current_user
-from app.models import comment, ticket, user  # noqa: F401
+from app.models import activity, comment, ticket, user  # noqa: F401
 from app.routers import auth
 from app.routers import users
 from app.routers import tickets
@@ -18,10 +18,16 @@ app = FastAPI(
     title="TicketFlow API",
     summary="A collaborative support workspace for customer issues.",
     version="1.1.0",
-    description="Create, triage, and resolve support requests. Authenticate via `/login`, then use **Authorize** with your bearer token.",
+    description=(
+        "Create, triage, and resolve support requests. Authenticate via "
+        "`/login`, then use **Authorize** with your bearer token."
+    ),
     openapi_tags=[
         {"name": "auth", "description": "Registration and token access."},
-        {"name": "tickets", "description": "Ticket queues, triage, and conversations."},
+        {
+            "name": "tickets",
+            "description": "Ticket queues, triage, and conversations.",
+        },
     ],
 )
 
@@ -46,7 +52,11 @@ app.include_router(metrics_router.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to TicketFlow", "docs": "/docs", "health": "ok"}
+    return {
+        "message": "Welcome to TicketFlow",
+        "docs": "/docs",
+        "health": "ok",
+    }
 
 
 @app.get("/me", response_model=UserRead)

@@ -11,7 +11,10 @@ class TicketComment(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     ticket_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("tickets.id", ondelete="CASCADE"), nullable=False, index=True
+        Integer,
+        ForeignKey("tickets.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     author_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("users.id"), nullable=False, index=True

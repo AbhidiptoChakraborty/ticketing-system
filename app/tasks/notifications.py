@@ -1,13 +1,10 @@
 import logging
 
+from app.tasks.celery_app import celery
+
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
-
-from typing import Any
-
-# import celery app lazily; Celery may be optional in some envs
-from app.tasks.celery_app import celery
 
 if celery:
     # register a simple celery task to run notifications in the worker
@@ -17,13 +14,16 @@ if celery:
 
 
 async def send_notification(message: str) -> None:
-    """Enqueue a notification to the Celery worker if available, otherwise log locally."""
+    """Enqueue a notification to Celery or log it if no worker is available."""
     if celery:
         try:
             # use delay to enqueue the task
             send_notification_task.delay(message)
             return
         except Exception:
-            logger.exception("Failed to enqueue notification task; falling back to local log")
+            logger.exception(
+                "Failed to enqueue notification task; "
+                "falling back to local log"
+            )
 
     logger.info(f"NOTIFICATION: {message}")
